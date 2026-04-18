@@ -1,14 +1,26 @@
 import { loadPyodide, version as pyodideVersion } from "pyodide";
 
 let pyodide = null;
+let pyodidePromise = null;
 
 async function getPyodide() {
-  if (!pyodide) {
-    pyodide = await loadPyodide({
+  if (pyodide) {
+    return pyodide;
+  }
+
+  if (!pyodidePromise) {
+    pyodidePromise = loadPyodide({
       indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
     });
   }
-  return pyodide;
+
+  try {
+    pyodide = await pyodidePromise;
+    return pyodide;
+  } catch (error) {
+    pyodidePromise = null;
+    throw error;
+  }
 }
 
 self.onmessage = async (event) => {
