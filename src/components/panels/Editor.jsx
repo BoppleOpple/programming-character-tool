@@ -12,7 +12,6 @@ export default function EditorPanel({
   setTabs,
   activeTabId,
   setActiveTabId,
-  setShowSettingsModal,
   setHasError,
   selectedPersona,
 }) {
@@ -135,14 +134,6 @@ export default function EditorPanel({
     <section className="left-panel">
       <div className="top-bar">
         <div className="top-left">
-          <button
-            className="icon-button"
-            onClick={() => setShowSettingsModal(true)}
-            aria-label="Open settings"
-          >
-            ⚙
-          </button>
-
           <div className="tab-list">
             {tabs.map((tab) => (
               <div

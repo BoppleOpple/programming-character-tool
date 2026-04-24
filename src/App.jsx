@@ -11,6 +11,7 @@ import {
   useMessageDispacher,
   useMessages,
 } from "./components/contexts/chatContext";
+import SidebarPanel from "./components/panels/Sidebar";
 
 const DEFAULT_CODE = `print("Hello world")`;
 
@@ -308,6 +309,10 @@ export default function App() {
         onChange={handleFilesSelected}
       />
 
+      <SidebarPanel
+        setShowSettingsModal={setShowSettingsModal}
+      />
+
       <EditorPanel
         accessibilityMode={accessibilityMode}
         textSize={textSize}
@@ -316,7 +321,6 @@ export default function App() {
         setTabs={setTabs}
         activeTabId={activeTabId}
         setActiveTabId={setActiveTabId}
-        setShowSettingsModal={setShowSettingsModal}
         setHasError={setHasError}
         selectedPersona={selectedPersona}
       />
