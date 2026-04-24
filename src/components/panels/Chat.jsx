@@ -4,7 +4,7 @@ import { useMessageDispacher, useMessages } from "../contexts/chatContext";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-function Message({ message, image }) {
+function Message({ message, image, selectedPersona }) {
   return (
     <div
       className={`chat-row ${
@@ -17,7 +17,7 @@ function Message({ message, image }) {
 
       <div
         className={`chat-message ${
-          message.sender === "user" ? "user-message" : "tutor-message"
+          message.sender === "user" ? "user-message" : `tutor-message ${selectedPersona}`
         }`}
       >
         <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
@@ -100,6 +100,7 @@ export default function ChatPanel({
                 <Message
                   message={message}
                   image={selectedPersona === "lion" ? lionImg : pandaImg}
+                  selectedPersona={selectedPersona}
                   key={message.id}
                 />
               ))}

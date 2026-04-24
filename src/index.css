@@ -42,7 +42,8 @@ textarea {
   --output-text: #39ff14;
   --lion-bg: #e7bf72;
   --panda-bg: #df9598;
-  --tutor-bubble: #edc391;
+  --lion-bubble: #e7bf72;
+  --panda-bubble: #ecb0b2;
   --user-bubble: #496153;
   --input-bg: #efefef;
   --modal-bg: #eef5ee;
@@ -60,7 +61,8 @@ textarea {
   --output-text: #ffe8a3;
   --lion-bg: #e1a93e;
   --panda-bg: #7d5cff;
-  --tutor-bubble: #ffd4a1;
+  --lion-bubble: #ffd4a1;
+  --panda-bubble: #af9bff;
   --user-bubble: #4d37c3;
   --input-bg: #ffffff;
   --modal-bg: #ffffff;
@@ -397,13 +399,32 @@ textarea {
 }
 
 .tutor-message {
-  background: var(--tutor-bubble);
   color: black;
+  border-bottom-left-radius: 0px;
+}
+
+.tutor-message.lion {
+  background: var(--lion-bubble);
+}
+
+.tutor-message.panda {
+  background: var(--panda-bubble);
+}
+
+/* make subsequent messages connect */
+.tutor-message + .tutor-message {
+  border-top-left-radius: 0px;
 }
 
 .user-message {
   background: var(--user-bubble);
   color: white;
+  border-bottom-right-radius: 0px;
+}
+
+/* make subsequent messages connect */
+.user-message + .user-message {
+  border-top-right-radius: 0px;
 }
 
 .chat-input-row {
