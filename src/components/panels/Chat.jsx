@@ -22,7 +22,9 @@ function Message({ message, selectedPersona }) {
           message.sender === "user" ? "user-message" : `tutor-message ${selectedPersona}`
         }`}
       >
-        <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+        <div className="chat-message-text-container">
+          <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+        </div>
       </div>
     </div>
   );

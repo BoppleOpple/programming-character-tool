@@ -33,6 +33,7 @@ textarea {
   --editor-divider: #375847;
   --output-bg: #152b22;
   --output-text: #39ff14;
+  --output-text-error: #ec7070;
   --lion-bg: #e7bf72;
   --panda-bg: #df9598;
   --lion-bubble: #e7bf72;
@@ -53,6 +54,7 @@ textarea {
   --editor-divider: #4d37c3;
   --output-bg: #1f1a52;
   --output-text: #ffe8a3;
+  --output-text-error: #ec7070;
   --lion-bg: #e1a93e;
   --panda-bg: #7d5cff;
   --lion-bubble: #ffd4a1;
@@ -231,6 +233,14 @@ textarea {
 
 .output-box pre {
   white-space: pre-wrap;
+}
+
+.stdout {
+  color: var(--output-text);
+}
+
+.stderr {
+  color: var(--output-text-error);
 }
 
 .panel-title {
@@ -413,6 +423,11 @@ textarea {
   line-height: 1.4;
   font-size: 16px;
   list-style-position: inside;
+}
+
+.chat-message-text-container {
+  overflow: scroll;
+  text-overflow: clip;
 }
 
 .tutor-message {

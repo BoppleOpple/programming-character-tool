@@ -56,8 +56,15 @@ export async function streamResponse(
   let codeMessageText = "Here's my current code:"
   for (let file of tabs) {
     if (file.language === "python") {
+      const fileLines = file.content.split("\n")
+
       codeMessageText += `\n${file.name}: \`\`\`\n`
-      codeMessageText += file.content
+      // we start at line 2 for error handling reasons
+      if (fileLines.length > 0) {
+        codeMessageText += file.content.split("\n").map((line, index) => `Line ${index + 2}: ${line}`).join("\n")
+      } else {
+        codeMessageText += `Line 2: ${file.content}`
+      }
       codeMessageText += "\n```\n"
     }
   }
@@ -82,4 +89,27 @@ export async function streamResponse(
       responseCallback(messageBody);
     }
   }
+}
+
+export function tutorErrorResponse(
+  programOutput
+) {
+  const errors = programOutput.filter(item => item.stream === "stderr").map(item => item.content);
+  
+  let messageText = null;
+  if (errors.length === 0) {
+    return "I see you encountered an error, but something went wrong when I tried to see the \
+    output. Do you want me to read through your code and explain what may have gone wrong?";
+  } else {
+    messageText = "I see you encountered some errors:";
+  }
+  console.log(errors)
+  for (const error of errors) {
+    messageText += "\n```\n";
+    messageText += error + "\n```";
+  }
+
+  messageText += "\n\nDo you want me to explain them?";
+
+  return messageText;
 }
