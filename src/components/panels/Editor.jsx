@@ -4,6 +4,8 @@ import Editor from "@monaco-editor/react";
 import pythonWorker from "../../pythonWorker.js?worker";
 import { EditorTutorIcon } from "../Icon";
 import { useTabDispacher, useTabs } from "../contexts/tabContext";
+import { useMessageDispacher } from "../contexts/chatContext";
+import { tutorErrorResponse } from "../../claudeIntegration";
 
 export default function EditorPanel({
   accessibilityMode,
@@ -15,9 +17,15 @@ export default function EditorPanel({
   selectedPersona,
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [output, setOutput] = useState("Program output will appear here.");
+  const [output, setOutput] = useState([{
+    stream: "stdout",
+    content: "Program output will appear here."
+  }]);
+  
   const tabs = useTabs();
   const tabDispacher = useTabDispacher();
+
+  const messageDispacher = useMessageDispacher();
 
   const activeTab = useMemo(
     () => tabs.find((tab) => tab.id === activeTabId) || tabs[0],
@@ -30,25 +38,42 @@ export default function EditorPanel({
 
     workerRef.current.onmessage = (event) => {
       const { output: workerOutput, ok } = event.data;
+      const anyStderr = workerOutput.reduce((alreadyErrored, message) => alreadyErrored || message.stream === "stderr", false);
+      const didError = ok === false || anyStderr;
+
       setOutput(workerOutput);
       setIsLoading(false);
-      setHasError(ok === false || workerOutput.toLowerCase().includes("error"));
+      setHasError(didError);
+
+      if (didError) {
+        messageDispacher({
+          action: "add",
+          sender: "assistant",
+          text: tutorErrorResponse(workerOutput)
+        });
+      }
     };
 
     return () => {
       workerRef.current?.terminate();
     };
-  }, [setHasError]);
+  }, [messageDispacher, setHasError]);
 
   function handleRun() {
     if (!activeTab || activeTab.isBinary) {
-      setOutput("This file cannot be run in the Python editor.");
+      setOutput([{
+        stream: "stderr",
+        content: "This file cannot be run in the Python editor."
+      }]);
       setHasError(true);
       return;
     }
 
     setIsLoading(true);
-    setOutput("Loading Python...");
+    setOutput([{
+      stream: "stdout",
+      content: "Loading Python..."
+    }]);
     workerRef.current?.postMessage({ code: activeTab.content });
   }
 
@@ -57,7 +82,7 @@ export default function EditorPanel({
       action: "update",
       id: tabId,
       content: value
-    })
+    });
   }
 
   function handleEditorWillMount(monaco) {
@@ -135,6 +160,10 @@ export default function EditorPanel({
 
   }
 
+  function formatOutput(outputItem, key) {
+    return <span className={outputItem.stream} key={key}>{outputItem.content + "\n"}</span>
+  }
+
   return (
     <section className="left-panel">
       <div className="top-bar">
@@ -202,6 +231,7 @@ export default function EditorPanel({
               folding: false,
               lineDecorationsWidth: 8,
               lineNumbersMinChars: 2,
+              lineNumbers: number => (number + 1).toString(),
               overviewRulerLanes: 0,
               renderLineHighlight: "none",
               scrollbar: {
@@ -220,7 +250,7 @@ export default function EditorPanel({
       <div className="bottom-section">
         <div className="output-box">
           <div className="panel-title">Output</div>
-          <pre>{output}</pre>
+          <pre>{output.map(formatOutput)}</pre>
         </div>
 
         <div className={`tutor-preview ${selectedPersona}`}>

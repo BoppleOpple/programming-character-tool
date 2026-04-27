@@ -3,6 +3,13 @@ import { loadPyodide, version as pyodideVersion } from "pyodide";
 let pyodide = null;
 let pyodidePromise = null;
 
+const DEFAULT_RESPONSE = [
+  {
+    stream: "stdout",
+    content: "Program finished with no output.",
+  },
+];
+
 async function getPyodide() {
   if (pyodide) {
     return pyodide;
@@ -23,31 +30,49 @@ async function getPyodide() {
   }
 }
 
+function safelyWrapCode(code) {
+  return `try:
+  ${code.replaceAll("\n", "\n  ")}
+  pass
+except Exception:
+  import traceback
+  traceback.print_exc()
+`;
+}
+
 self.onmessage = async (event) => {
-  const { code } = event.data;
+  const code = safelyWrapCode(event.data.code);
+  const output = [];
 
   try {
     const py = await getPyodide();
-    const output = [];
 
     py.setStdout({
-      batched: (text) => output.push(text),
+      batched: (text) =>
+        output.push({
+          stream: "stdout",
+          content: text,
+        }),
     });
 
     py.setStderr({
-      batched: (text) => output.push(text),
+      batched: (text) =>
+        output.push({
+          stream: "stderr",
+          content: text,
+        }),
     });
 
     await py.runPythonAsync(code);
 
     self.postMessage({
       ok: true,
-      output: output.join("\n") || "Program finished with no output.",
+      output: output.length > 0 ? output : DEFAULT_RESPONSE,
     });
-  } catch (error) {
+  } catch {
     self.postMessage({
       ok: false,
-      output: String(error),
+      output: output,
     });
   }
 };
